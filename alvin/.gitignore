@@ -1,0 +1,3 @@
+*.pyc
+settings.py
+photodb_django_import.py

@@ -1,0 +1,51 @@
+{% extends "alvin/base.html" %}
+
+{% block content %}
+
+<div id="pageTitle">alvin &gt; <a href="{% url alvin.core.views.main %}">main menu</a> &gt; <a href="{% url alvin.core.views.get_items %}">item</a> &gt; {{ item.identifier }}</div>  
+
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">metadata</a></li>
+        <li><a href="#tabs-2">files and parts</a></li>
+    </ul>
+
+<div id="tabs-1">
+<form method="POST">
+<table class="form" cellspacing="5" cellpadding="5">
+<tr><td colspane=2"><img src="{{ MEDIA_URL }}/thumbs/{{ item.get_thumb|default_if_none:"no_image.jpg" }}" /></td></tr>
+{% if user.is_authenticated %}
+{% for field in alvin_item_form %}
+        <div class="fieldWrapper">
+            {% if field.errors %}
+            <td><td colspan="2">
+            <div class="ui-widget">
+                <div class="ui-state-error ui-corner-all" style="padding: 0 .7em;">
+                    <p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
+            {# NOTE: must use id_NAME for jquery.validation to overwrite error label #}
+            <label class='error' for='id_{{ field.name }}' generated="true">{{ field.errors|join:". " }}</label>
+            </div>
+            </div>
+            </td><tr>
+            {% endif %}
+            <tr><td>{{ field.label_tag }}</td><td>{{ field }}</td></tr>
+        </div>
+    {% endfor %}
+    <tr><td>&nbsp;</td><td><input type="submit" class="medium" id="id_submit" value="save changes" /></td></tr>
+{% else %}
+    {% for name, value in static_fields %}<tr><th>{{ name|title }}</th><td>{{ value }}</td></tr>{% endfor %}
+{% endif %}
+</table>
+</form>
+</div>
+<div id="tabs-2">
+<table>
+{% ifequal item.type 'image'%}<tr><td>Files:</td> <td>{% for file in item.image_item_file_set.all %} {{ file.name }} {% endfor %}</td> </tr>
+{% else %}
+<tr><td>Media Objects:</td> <td>{% for mo in item.media_object_set.all %} {{ mo.name }} {% endfor %}</td> </tr>
+{% endifequal %}
+</table>
+
+</div>
+{% endblock %}

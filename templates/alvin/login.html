@@ -1,0 +1,26 @@
+{% extends "alvin/base.html" %}
+{% block content %}
+{% load humanize %}
+<div id="pageTitle">alvin &gt; <a href="{% url alvin.core.views.main %}">main menu</a> &gt; login</div>
+
+<div id="login_dialog" class="box">
+    <table>
+    <form method="POST" action="{% url alvin.core.views.handle_login %}">
+    <tr>
+    <td><label>username:</label></td>
+    <td><input type="text" name="username" /></td>
+    </tr>
+    <tr>
+    <td><label>password:</label></td>
+    <td><input type="text" name="password"/></td>
+    <script type="text/javascript">document.write('<input type="hidden" name="redirect_to" value="' + document.URL + '"/>')</script>
+    <tr>
+    <td colspan="2">
+    <input type="submit" value="go"/>
+    </td>
+    </tr>
+    </form>
+    </table>
+</div>
+
+{% endblock %}

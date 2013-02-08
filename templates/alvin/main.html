@@ -1,0 +1,14 @@
+{% extends "alvin/base.html" %}
+{% block content %}
+{% load humanize %}
+<div id="pageTitle">alvin &gt; main menu</div>
+
+<table cellpadding="15" cellspacing="10"><tr>
+<td class="box" width="400">
+<h2>browse:</h2>
+<h3>&#182; <a href="{% url alvin.core.views.get_items %}">items</a></h3>
+</ul>
+    
+</td></tr>
+</table>
+{% endblock %}

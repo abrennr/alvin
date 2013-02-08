@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>{% block title %}alvin{% endblock %}</title>
+    {% load adminmedia %}
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/jquery/jquery-ui.custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
+    <script type="text/javascript" src="{{ MEDIA_URL }}/jquery/jquery.js"></script> 
+    <script type="text/javascript" src="{{ MEDIA_URL }}/jquery/jquery-ui.custom.js"></script> 
+
+ <script type="text/javascript">
+    
+
+	$(function() {
+	
+	    $("input:first").focus();
+		$("#tabs").tabs();
+
+	});
+	</script>
+
+</head>
+
+<body>
+
+
+<div id="pageNav">
+    <li class="pageNavElement">
+    <form name="form" method="GET" action="{% url alvin.core.views.get_items %}">
+    search:
+    <input type="text" name="q" class="small" size="14" />
+    <select name="lookup" class="small">
+    <option>identifier</option>
+    <option>title</option>
+    <option>subject</option>
+    <option>description</option>
+    </select>
+    <input type="submit" value="go"/>
+    &nbsp;
+    <input type="reset" value="clear"/>
+    </form>
+    </li>
+  {% if user.is_authenticated %}
+    <li class="pageNavElement"><a href="{% url alvin.core.views.item_new %}">create a new item</a></li> 
+  {% endif %}
+  {% if user.is_authenticated %}
+   <li class="pageNavElement">you are logged in as <span class="hilight">{{ user.first_name }}</span> &gt; <script type="text/javascript">document.write('<a href="{% url alvin.core.views.logout_passthrough %}?redirect_to=' + document.URL + '">logout</a>')</script></li>
+  {% else %}
+       <li class="pageNavElement"><a href="{% url alvin.core.views.handle_login %}">log in</a></li>
+  {% endif %} 
+</div>
+
+{% block content %}{% endblock %}
+      
+
+</body>
+</html>

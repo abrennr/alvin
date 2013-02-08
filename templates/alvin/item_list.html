@@ -1,0 +1,46 @@
+{% extends "alvin/base.html" %}
+{% block content %}
+
+<div id="pageTitle">
+  alvin &gt;
+  <a href="{% url alvin.core.views.main %}">main menu</a> &gt; <a href="{% url alvin.core.views.get_items %}">item</a>
+</div>  
+
+<div id="facets">
+{% for facet, items in facet_block.items %}
+  <p>{{ facet }}</p>
+     <ul>
+     {% for label, href in items.items %}
+     <li><a href="?{{ href }}">{{ label }}</a></li>
+     {% endfor %}
+     </ul>
+ {% endfor %}
+</div>
+
+<div id="body_content">
+ {% include "alvin/pager_nav.html" %}
+  <table border="0" cellpadding="5" class="striped" width="100%">
+    <thead>
+      <tr>
+	    <th width="160">image</th>
+	    <th width="180">id</th>
+        <th>title</th>
+        <th>format</th>
+      </tr>
+    </thead>
+
+    {% for i in items.object_list %}
+    <tr>
+      <td><center><a href="{% url alvin.core.views.item_detail i.identifier %}"><img src="{{ MEDIA_URL }}/thumbs/{{ i.get_thumb|default_if_none:"no_image.jpg" }}" /></a></center></td>
+      <td><a href="{% url alvin.core.views.item_detail i.identifier %}">{{ i.identifier }}</a></td>
+      <td><a href="{% url alvin.core.views.item_detail i.identifier %}">{{ i.title }}</a></td>
+      <td>{{ i.format }}</td>
+    </tr>
+    {% endfor %}
+
+  </table>
+
+ {% include "alvin/pager_nav.html" %}
+</div>
+
+{% endblock %}
