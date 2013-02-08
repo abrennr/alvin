@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 *.pyc
 *.wsgi
+*.log
+*.pot
+>>>>>>> cdf1c5b59622fb4af323af35518b00055feb2e6e
