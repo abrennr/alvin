@@ -109,21 +109,6 @@ def get_items(request):
 
     paged_items = get_paged_items(items, request)
     facet_block = get_facet_block(items, Item.Facet.fields, request)
-#    batch_facet = []
-#    for b in Batch.objects.all():
-#        b.count = items.filter(batch=b).count() 
-#        if b.count > 0:
-#            batch_facet.append(b)
-#    collection_facet = []
-#    for c in Collection.objects.all():
-#        c.count = items.filter(collection=c).count() 
-#        if c.count > 0:
-#            collection_facet.append(c)
-#    digital_collection_facet = []
-#    for dc in Digital_Collection.objects.all():
-#        dc.count = items.filter(digital_collection=dc).count()
-#        if dc.count > 0: 
-#            digital_collection_facet.append(dc)
     t = loader.get_template('alvin/item_list.html')
     c = RequestContext(request, { 
         'items' : paged_items, 
