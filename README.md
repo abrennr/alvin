@@ -16,15 +16,15 @@ alvin requires Django [https://www.djangoproject.com/] and the Django applicatio
 
 alvin is distributed with three subdirectories:
 
-`alvin` - contains the django application code
-`media` - contains the static media files (e.g., css, javascript)
-`templates` - contains the django template files
+* `alvin` contains the django application code
+* `media` contains the static media files (e.g., css, javascript)
+* `templates` contains the django template files
 
 ### 2.3 Installation and configuration
 
 The `alvin` and `templates` directories can be installed anywhere you would like on your system, but for security reasons should *not* be in under the web server's document root.  `media` on the other hand, should be in a web-accessible location, either on the same server as django or a separate server dedicated to serving static media. 
 
-If a database for alvin does not already exist, create one now.  You will need the database engine (one of 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'), the database name, the database username, and the database password.  No tables need to be created inside the database; the django `syncdb` command will take care of table creation later.
+If a database for alvin does not already exist, create one now.  For the next step of editing the django settings file, you will need to remember the database engine (one of 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'), the database name, the database username, and the database user's password.  No tables need to be created inside the database; the django `syncdb` command will take care of table creation later.
 
 Once installed, the 'settings.py.example' file in the 'alvin' directory should be copied to 'settings.py' and populated with local values. Update the following fields:
 * `DATABASE_ENGINE` value should be database you are using
@@ -40,7 +40,9 @@ Once installed, the 'settings.py.example' file in the 'alvin' directory should b
 * `INSTALLED_APPS` should include `'django_filters'` and `'alvin.core'`
 
 After the settings.py file has been updated, from within the `alvin` directory, run the command:
+```
     python manage.py syncdb
-The command should create the necessary tables.  Also, because a file of inital data has been included (`initial_data.json`), the ssyncdb command should load the initial data.  It will do this each time the command is run, overwriting changes that have been made.  To avoid this behavior, remove or rename the `initial_data.json` file.
+```
+The command should create the necessary tables.  Also, because a file of inital data has been included (`initial_data.json`), the syncdb command should load the initial data.  It will do this each time the command is run, overwriting changes that have been made.  To avoid this behavior, remove or rename the `initial_data.json` file.
 
 At this point, the application should be functional.
