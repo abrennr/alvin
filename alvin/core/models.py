@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django import forms
 import django_filters
 
@@ -33,12 +34,6 @@ FILE_USE_CHOICES = (
     ('OTHER', 'other'),
 )
 
-ITEM_TYPE_CHOICES = (
-    ('image', 'image'),
-    ('audio', 'audio'),
-    ('video', 'video'),
-)
-
 NAME_TYPE_CHOICES = (
     ('personal', 'personal'),
     ('corporate', 'corporate'),
@@ -64,6 +59,7 @@ PUBLICATION_STATUS_VALUES = (
 class Collection(models.Model):
     identifier = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+    pref_cite = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -92,7 +88,7 @@ class Digital_Collection(models.Model):
 class Batch(models.Model):
     identifier = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name
@@ -113,7 +109,7 @@ class Format(models.Model):
     class Meta:
         ordering = ["name"]
 
-class Location(models.Model):
+class SubjectLocation(models.Model):
     name = models.CharField(max_length=255)
 
     def __unicode__(self):
@@ -123,56 +119,107 @@ class Location(models.Model):
         ordering = ["name"]
 
 
-class Creator(models.Model):
+class Name(models.Model):
     name = models.CharField(max_length=255)
-    type = models.CharField(max_length=255, blank=True, null=True, choices=NAME_TYPE_CHOICES)
+    type = models.CharField(max_length=255, blank=True, choices=NAME_TYPE_CHOICES)
+    viaf_uri = models.URLField(verify_exists=True, blank=True)
 
     def __unicode__(self):
         return self.name
 
     class Meta:
         ordering = ["name"]
+
+class TypeOfResource(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+
+class Genre(models.Model):
+    name = models.CharField(max_length=255)
+    parent = models.ForeignKey(TypeOfResource)
+    notes = models.TextField(blank=True)
+    related_marcgt_term = models.CharField(max_length=255, blank=True)
+    related_aat_term = models.CharField(max_length=255, blank=True)
+    related_aat_term_id = models.CharField(max_length=255, blank=True)
+    related_aat_term_notes = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+
+class Subject(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+
+class Language(models.Model):
+    name = models.CharField(max_length=255)
+    iso639_1 = models.CharField(max_length=2)
+    iso639_2b = models.CharField(max_length=3)
+    iso639_2t = models.CharField(max_length=3)
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        ordering = ["name"]
+
+
 
 class Item(models.Model):
     # basic item descriptive metadata
     identifier = models.CharField(max_length=255, unique=True) 
-    type = models.CharField(max_length=255, choices=ITEM_TYPE_CHOICES) 
-    batch = models.ForeignKey(Batch, blank=True, null=True) 
+    type = models.ForeignKey(TypeOfResource) 
+    genres = models.ManyToManyField(Genre, blank=True) 
+    batches = models.ManyToManyField(Batch, blank=True) 
     title = models.CharField(max_length=255) 
-    creator = models.ForeignKey(Creator, blank=True, null=True) 
-    description = models.TextField(blank=True, null=True)
-    normalized_date = models.CharField(max_length=255, blank=True, null=True) 
-    display_date = models.CharField(max_length=255, blank=True, null=True) 
+    creators = models.ManyToManyField(Name, blank=True, related_name='creator_name') 
+    contributors = models.ManyToManyField(Name, blank=True, related_name='contributor_name') 
+    description = models.TextField(blank=True)
+    date = models.CharField(max_length=255, blank=True) 
+    date_qualifier = models.BooleanField(verbose_name="date qualified?") 
     format = models.ForeignKey(Format, blank=True, null=True)
-    subject = models.TextField(blank=True, null=True) 
-    # previously "rights", change to copyrightMD style
-    rights = models.CharField(max_length=255, blank=True, null=True) 
+    extent = models.CharField(max_length=255, blank=True)
+    subjects = models.ManyToManyField(Subject, blank=True) 
     copyright_status = models.CharField(max_length=255, choices=COPYRIGHT_STATUS_VALUES, default='unknown') 
     publication_status = models.CharField(max_length=255, choices=PUBLICATION_STATUS_VALUES, default='unknown') 
-    copyright_holder = models.CharField(max_length=255, blank=True, null=True) 
-    copyright_notes = models.CharField(max_length=255, blank=True, null=True) 
-    collection = models.ForeignKey(Collection, blank=True, null=True) 
+    copyright_holder = models.CharField(max_length=255, blank=True) 
+    copyright_notes = models.CharField(max_length=255, blank=True) 
+    restriction_status = models.CharField(max_length=255, blank=True) 
+    restriction_notes = models.CharField(max_length=255, blank=True) 
+    release_forms = models.CharField(max_length=255, blank=True) 
+    publisher = models.CharField(max_length=255, blank=True) 
+    language = models.ForeignKey(Language, blank=True, null=True) 
+    source_collection = models.ForeignKey(Collection, blank=True, null=True) 
     digital_collection = models.ForeignKey(Digital_Collection, blank=True, null=True) 
-    image_number = models.CharField(max_length=255, blank=True, null=True) 
-    location = models.ForeignKey(Location, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True) 
-    notes = models.TextField(blank=True, null=True) 
-    image_name = models.CharField(max_length=255, blank=True, null=True) 
-    ordering_information = models.CharField(max_length=255, blank=True, null=True) 
-    date_added = models.CharField(max_length=255, blank=True, null=True) 
-    timestamp = models.CharField(max_length=255, blank=True, null=True) 
-    date_revised = models.CharField(max_length=255, blank=True, null=True) 
-    scanning_status = models.CharField(max_length=255, blank=True, null=True) 
-    processing_status = models.CharField(max_length=255, blank=True, null=True) 
-    completed_by = models.CharField(max_length=255, blank=True, null=True) 
-    digitized_date = models.CharField(max_length=255, blank=True, null=True) 
-    date_digitized = models.CharField(max_length=255, blank=True, null=True) 
-    digital_notes = models.CharField(max_length=255, blank=True, null=True) 
+    source_id = models.CharField(max_length=255, blank=True, verbose_name="legacy id for source object") 
+    subject_location = models.ForeignKey(SubjectLocation, blank=True, null=True, verbose_name="location")
+    #geotag = models.ForeignKey(GeoTag, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True) 
+    notes = models.TextField(blank=True) 
+    record_created = models.DateTimeField(max_length=255, auto_now_add=True) 
+    last_modified = models.DateTimeField(max_length=255, auto_now=True) 
+    scanning_status = models.CharField(max_length=255, blank=True) 
+    processing_status = models.CharField(max_length=255, blank=True) 
+    completed_by = models.CharField(max_length=255, blank=True) 
+    date_digitized = models.DateTimeField(max_length=255, blank=True, null=True) 
+    digital_notes = models.CharField(max_length=255, blank=True) 
 
     def __unicode__(self):
-        return self.identifier
+        return u'%s / %s' % (self.identifier, self.title)
   
-    def get_thumb(self):
+    def thumbnail(self):
         try:
             if self.type in ['audio', 'video']:
                 filename =  Media_Object_File.objects.filter(media_object__item=self)[0].name
@@ -183,9 +230,11 @@ class Item(models.Model):
             if len(thumb_filename) < 1:
                 return None
             else:
-                return thumb_filename
+                return '<img src="%s%s%s"/>' % (settings.MEDIA_URL, 'thumbs/', thumb_filename,)
         except:
             return None 
+    thumbnail.short_description = "Image Thumbnail"
+    thumbnail.allow_tags = True
 
     def get_path(self):
         try:
@@ -198,16 +247,30 @@ class Item(models.Model):
         ordering = ["identifier"]
     
     class Facet:    
-        fields = ['collection', 'digital_collection', ]
+        fields = ['source_collection', 'digital_collection', ]
+
+class GeoTag(models.Model):
+    item = models.ForeignKey(Item)
+    lat = models.FloatField()
+    long = models.FloatField()
+    heading = models.FloatField(null=True, blank=True)
+    pitch = models.FloatField(null=True, blank=True)
+    zoom = models.FloatField(null=True, blank=True)
+
+    def __unicode__(self):
+        return '%s, %s' % (self.lat, self.long)
+
+    class Meta:
+        ordering = ["lat"]
 
 class Media_Object(models.Model):
     item = models.ForeignKey(Item)
     identifier = models.CharField(max_length=255, unique=True) 
     title = models.CharField(max_length=255) 
-    creator = models.ForeignKey(Creator, blank=True, null=True) 
-    description = models.TextField(blank=True, null=True)
-    normalized_date = models.CharField(max_length=255, blank=True, null=True) 
-    display_date = models.CharField(max_length=255, blank=True, null=True) 
+    creator = models.ForeignKey(Name, blank=True, null=True) 
+    description = models.TextField(blank=True)
+    normalized_date = models.CharField(max_length=255, blank=True) 
+    display_date = models.CharField(max_length=255, blank=True) 
     format = models.ForeignKey(Format, blank=True, null=True)
 
     def inherit_from_parent(self, override_existing=False):
@@ -226,10 +289,10 @@ class Media_Object(models.Model):
 
 class File(models.Model):
     name = models.CharField(max_length=255) 
-    path = models.CharField(max_length=255, blank=True, null=True)
+    path = models.CharField(max_length=255, blank=True)
     size_bytes = models.IntegerField(blank=True, null=True, editable=False)
-    mime_type = models.CharField(max_length=255, choices=MIME_TYPE_CHOICES, blank=True, null=True)
-    use = models.CharField(max_length=255, choices=FILE_USE_CHOICES, blank=True, null=True)
+    mime_type = models.CharField(max_length=255, choices=MIME_TYPE_CHOICES, blank=True)
+    use = models.CharField(max_length=255, choices=FILE_USE_CHOICES, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
 class Media_Object_File(File):
@@ -242,17 +305,17 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item 
    
-class CreatorForm(forms.ModelForm):
+class NameForm(forms.ModelForm):
     class Meta:
-        model = Creator 
+        model = Name 
    
 class FormatForm(forms.ModelForm):
     class Meta:
         model = Format 
    
-class LocationForm(forms.ModelForm):
+class SubjectLocationForm(forms.ModelForm):
     class Meta:
-        model = Location 
+        model = SubjectLocation 
    
 class CollectionForm(forms.ModelForm):
     class Meta:
